@@ -10,21 +10,12 @@
 
 // ===== CONFIGURAÇÃO =====
 
-// URL padrão do webhook n8n
-// - Prefere a URL do ambiente (VITE_N8N_WEBHOOK_URL)
-// - Fallback para a URL anterior caso a env não exista
-const DEFAULT_WEBHOOK_URL =
-  import.meta.env.VITE_N8N_WEBHOOK_URL ||
-  "https://webhook.naveedu.io/webhook/maplebear-tutor";
+// Em desenvolvimento, use sempre a rota local do proxy Vite para evitar CORS.
+// A URL real do n8n fica no vite.config.ts (server.proxy target).
+const DEFAULT_WEBHOOK_URL = "/api-n8n";
 
 // Timeout para a chamada ao webhook (ms)
 const WEBHOOK_TIMEOUT = 30_000;
-
-// CORS proxy para contornar bloqueio de navegador quando o n8n não envia headers CORS
-const CORS_PROXIES = [
-  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-];
 
 // ===== STORAGE =====
 
@@ -59,7 +50,7 @@ export function hasCustomWebhookUrl(): boolean {
 
 export function isWebhookConfigured(): boolean {
   const url = getWebhookUrl();
-  return url.startsWith("http");
+  return url.startsWith("http") || url.startsWith("/");
 }
 
 // ===== TYPES =====
@@ -135,17 +126,12 @@ export async function sendToN8n(req: N8nRequest): Promise<N8nResponse> {
 
   console.log(`[n8n] Payload:`, JSON.parse(payload));
 
-  // Tenta direto primeiro, depois via proxies CORS se falhar
-  const urlsToTry = [
-    webhookUrl,
-    ...CORS_PROXIES.map((proxy) => proxy(webhookUrl)),
-  ];
+  const urlsToTry = [webhookUrl];
 
   let lastError: Error | null = null;
 
   for (const url of urlsToTry) {
-    const isDirect = url === webhookUrl;
-    const label = isDirect ? "direct" : "proxy";
+    const label = "proxy";
 
     try {
       console.log(`[n8n] Trying ${label}: ${url.substring(0, 100)}...`);
@@ -156,7 +142,6 @@ export async function sendToN8n(req: N8nRequest): Promise<N8nResponse> {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
         body: payload,
         signal: controller.signal,
@@ -194,10 +179,6 @@ export async function sendToN8n(req: N8nRequest): Promise<N8nResponse> {
         console.warn("[n8n] Empty response from webhook. Full data:", data);
         lastError = new Error("Resposta vazia do webhook");
         continue;
-      }
-
-      if (!isDirect) {
-        console.log(`[n8n] ✅ CORS proxy worked! Consider adding CORS headers to your n8n server.`);
       }
 
       console.log(`[n8n] ✅ Response received (${text.length} chars)`);
@@ -297,10 +278,7 @@ export async function checkWebhookHealth(): Promise<{
     timestamp: new Date().toISOString(),
   });
 
-  const urlsToTry = [
-    webhookUrl,
-    ...CORS_PROXIES.map((proxy) => proxy(webhookUrl)),
-  ];
+  const urlsToTry = [webhookUrl];
 
   for (const url of urlsToTry) {
     try {
@@ -328,7 +306,7 @@ export async function checkWebhookHealth(): Promise<{
   return {
     ok: false,
     latencyMs: Date.now() - start,
-    error: "Falha na conexão (CORS ou servidor offline)",
+    error: "Falha na conexão (proxy local ou servidor offline)",
   };
 }
 
