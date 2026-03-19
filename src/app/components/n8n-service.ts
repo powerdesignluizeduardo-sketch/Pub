@@ -10,8 +10,12 @@
 
 // ===== CONFIGURAÇÃO =====
 
-// URL padrão do webhook n8n — substitua pela sua URL de produção
-const DEFAULT_WEBHOOK_URL = "https://webhook.naveedu.io/webhook/maplebear-tutor";
+// URL padrão do webhook n8n
+// - Prefere a URL do ambiente (VITE_N8N_WEBHOOK_URL)
+// - Fallback para a URL anterior caso a env não exista
+const DEFAULT_WEBHOOK_URL =
+  import.meta.env.VITE_N8N_WEBHOOK_URL ||
+  "https://webhook.naveedu.io/webhook/maplebear-tutor";
 
 // Timeout para a chamada ao webhook (ms)
 const WEBHOOK_TIMEOUT = 30_000;
@@ -200,7 +204,15 @@ export async function sendToN8n(req: N8nRequest): Promise<N8nResponse> {
 
       return {
         text: cleanResponse(text),
-        audioUrl: data.audioUrl || data.audio_url || data.ttsUrl || undefined,
+        // Aceita variações comuns de nomes para a URL do áudio
+        audioUrl:
+          data.audioUrl ||
+          data.audio_url ||
+          data.ttsUrl ||
+          data.tts_url ||
+          data.audioLink ||
+          data.audio_link ||
+          undefined,
         source: data.source || "n8n",
         metadata: data.metadata || {},
       };
