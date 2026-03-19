@@ -12,7 +12,7 @@
 
 // Em desenvolvimento, use sempre a rota local do proxy Vite para evitar CORS.
 // A URL real do n8n fica no vite.config.ts (server.proxy target).
-const DEFAULT_WEBHOOK_URL = "/api-n8n";
+const DEFAULT_WEBHOOK_URL = "/api-n8n/webhook/maplebear-tutor";
 
 // Timeout para a chamada ao webhook (ms)
 const WEBHOOK_TIMEOUT = 30_000;
@@ -107,7 +107,7 @@ export interface N8nResponse {
  */
 export async function sendToN8n(req: N8nRequest): Promise<N8nResponse> {
   // Força uso da rota relativa do proxy Vite para evitar CORS.
-  const webhookUrl = "/api-n8n";
+  const webhookUrl = "/api-n8n/webhook/maplebear-tutor";
 
   console.log(`[n8n] Sending to webhook: ${webhookUrl}`);
   console.log(`[n8n] Tutor: ${req.tutorKey}, Style: ${req.styleId}`);
@@ -270,7 +270,7 @@ export async function checkWebhookHealth(): Promise<{
   error?: string;
 }> {
   // Health-check também passa pelo proxy local.
-  const webhookUrl = "/api-n8n";
+  const webhookUrl = "/api-n8n/webhook/maplebear-tutor";
   const start = Date.now();
   const healthPayload = JSON.stringify({
     message: "__health_check__",

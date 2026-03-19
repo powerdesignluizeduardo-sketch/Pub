@@ -3,8 +3,9 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
-const n8nWebhookTarget =
-  process.env.VITE_N8N_WEBHOOK_URL || 'https://webhook.naveedu.io/webhook/maplebear-tutor'
+// Cole aqui APENAS o domínio base do n8n (sem /webhook e sem o ID).
+// Exemplo: https://webhook.naveedu.io
+const n8nBaseTarget = process.env.VITE_N8N_BASE_URL || 'https://webhook.naveedu.io'
 
 export default defineConfig({
   plugins: [
@@ -23,7 +24,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api-n8n': {
-        target: n8nWebhookTarget,
+        target: n8nBaseTarget,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api-n8n/, ''),
