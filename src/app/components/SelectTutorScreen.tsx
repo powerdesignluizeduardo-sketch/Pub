@@ -1,13 +1,19 @@
+import tutorInglesImage from "../../assets/64af5bea1f7d7b69df13506b3145a332f5049f18.png";
+import tutorMatematicaImage from "../../assets/060c3252628a858a4cfcc538886d6f1d1c5950f1.png";
+import tutorGeografiaImage from "../../assets/d0f70ddc6a30f0e98f4af7fa8f7ca896e028f8ff.png";
+import tutorFisicaImage from "../../assets/054dfe02e425078fdd66113858fbed2e929f9c10.png";
+import tutorHistoriaImage from "../../assets/6c3426f11b33df20ca0ee5541adeebb2cfe1674d.png";
+
 interface SelectTutorScreenProps {
   onSelect: (tutor: string) => void;
 }
 
 const tutors = [
-  { id: "ingles", name: "Ingles", subtitle: "Maple Bear", image: "https://via.placeholder.com/150" },
-  { id: "matematica", name: "Matematica", subtitle: "Leonardo Fibonacci", image: "https://via.placeholder.com/150" },
-  { id: "geografia", name: "Geografia", subtitle: "Alexander von Humboldt", image: "https://via.placeholder.com/150" },
-  { id: "fisica", name: "Fisica", subtitle: "Einstein", image: "https://via.placeholder.com/150" },
-  { id: "historia", name: "Historia", subtitle: "Em breve", image: "https://via.placeholder.com/150", disabled: true },
+  { id: "ingles", name: "Ingles", subtitle: "Maple Bear", image: tutorInglesImage },
+  { id: "matematica", name: "Matematica", subtitle: "Leonardo Fibonacci", image: tutorMatematicaImage },
+  { id: "geografia", name: "Geografia", subtitle: "Alexander von Humboldt", image: tutorGeografiaImage },
+  { id: "fisica", name: "Fisica", subtitle: "Einstein", image: tutorFisicaImage },
+  { id: "historia", name: "Historia", subtitle: "Em breve", image: tutorHistoriaImage, disabled: true },
 ];
 
 export function SelectTutorScreen({ onSelect }: SelectTutorScreenProps) {
@@ -43,7 +49,7 @@ export function SelectTutorScreen({ onSelect }: SelectTutorScreenProps) {
               {/* Background */}
               <div className={`absolute inset-0 ${tutor.disabled ? "bg-[#ece6f0]" : ""}`}>
                 <img
-                  alt={tutor.name}
+                  alt={`Imagem do tutor ${tutor.name}`}
                   className={`absolute inset-0 w-full h-full ${
                     tutor.disabled ? "mix-blend-luminosity object-contain" : "object-cover"
                   } transition-transform duration-500 group-hover:scale-105`}

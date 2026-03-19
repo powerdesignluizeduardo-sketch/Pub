@@ -1,4 +1,5 @@
 import { useState } from "react";
+import mapleBearLogo from "../../assets/6c3426f11b33df20ca0ee5541adeebb2cfe1674d.png";
 
 export interface StudentInfo {
   numero: string;
@@ -42,9 +43,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               style={{ width: "31.25%", height: "26.25%", left: "34.2%", top: "43.8%" }}
             />
             <img
-              alt="Maple Bear Logo"
+              alt="Logo da Maple Bear"
               className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-              src="https://via.placeholder.com/150"
+              src={mapleBearLogo}
             />
           </div>
           <p

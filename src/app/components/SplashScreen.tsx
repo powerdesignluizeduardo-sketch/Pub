@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "motion/react";
+import mapleBearLogo from "../../assets/6c3426f11b33df20ca0ee5541adeebb2cfe1674d.png";
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -44,9 +45,9 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
             style={{ width: "31.25%", height: "26.25%", left: "34.2%", top: "43.8%" }}
           />
           <img
-            alt="Maple Bear Logo"
+            alt="Logo da Maple Bear na tela de abertura"
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            src="https://via.placeholder.com/150"
+            src={mapleBearLogo}
           />
         </div>
         <p
