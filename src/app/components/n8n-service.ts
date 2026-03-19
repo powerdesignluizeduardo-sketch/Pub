@@ -106,7 +106,8 @@ export interface N8nResponse {
  * @throws Error se o webhook falhar ou não responder
  */
 export async function sendToN8n(req: N8nRequest): Promise<N8nResponse> {
-  const webhookUrl = getWebhookUrl();
+  // Força uso da rota relativa do proxy Vite para evitar CORS.
+  const webhookUrl = "/api-n8n";
 
   console.log(`[n8n] Sending to webhook: ${webhookUrl}`);
   console.log(`[n8n] Tutor: ${req.tutorKey}, Style: ${req.styleId}`);
@@ -268,7 +269,8 @@ export async function checkWebhookHealth(): Promise<{
   latencyMs: number;
   error?: string;
 }> {
-  const webhookUrl = getWebhookUrl();
+  // Health-check também passa pelo proxy local.
+  const webhookUrl = "/api-n8n";
   const start = Date.now();
   const healthPayload = JSON.stringify({
     message: "__health_check__",
