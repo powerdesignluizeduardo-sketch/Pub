@@ -27,16 +27,35 @@ export const sendToN8n = async (payload: any): Promise<N8nResponse> => {
     });
 
     if (!response.ok) {
-      throw new Error(`Erro no n8n: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Erro no n8n (${response.status}): ${errorText || 'Sem mensagem de erro'}`);
     }
 
-    const data = await response.json();
+    // Lendo a resposta como texto primeiro para evitar o erro de JSON vazio
+    const responseText = await response.text();
+    
+    if (!responseText || responseText.trim() === "") {
+      console.warn("O n8n respondeu com sucesso (200), mas o corpo da resposta está vazio.");
+      return {
+        text: "O n8n recebeu a mensagem, mas não enviou uma resposta de texto. Verifique o nó 'Respond to Webhook' no seu fluxo.",
+      };
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Erro ao converter resposta do n8n para JSON:", responseText);
+      return {
+        text: "O n8n enviou uma resposta que não é um JSON válido. Verifique o formato de saída no n8n.",
+      };
+    }
 
     // ATENÇÃO AQUI: Estamos assumindo que o seu n8n devolve um JSON assim: 
     // { "resposta": "Texto do urso" }
     // Se o nome do campo for diferente no n8n, mude o 'data.resposta' abaixo!
     return {
-      text: data.resposta || data.text || "Ops, o n8n não enviou o texto no formato certo.",
+      text: data.resposta || data.text || data.message || "Ops, o n8n não enviou o texto no formato esperado.",
       audioUrl: data.audioUrl || undefined
     };
 
