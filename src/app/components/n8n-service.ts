@@ -1,49 +1,58 @@
-// n8n-service.ts
-
+// Import necessary libraries
 import axios from 'axios';
 
-class N8nService {
-    private baseUrl: string;
+// Define types for the response and config
+interface MapleBearResponse {
+    data: any;
+    status: number;
+}
 
-    constructor(baseUrl: string) {
-        this.baseUrl = baseUrl;
+interface MapleBearConfig {
+    baseURL: string;
+    timeout?: number;
+    retry?: number;
+}
+
+class MapleBear {
+    private config: MapleBearConfig;
+    private currentRetry: number = 0;
+
+    constructor(config: MapleBearConfig) {
+        this.config = config;
     }
 
-    // CORS proxy handling
-    private getProxiedUrl(url: string): string {
-        return `https://your-cors-proxy.com/${url}`; // Use your actual CORS proxy here
-    }
+    // Method to perform a GET request with CORS and retry logic
+    async get(endpoint: string): Promise<MapleBearResponse> {
+        const url = `${this.config.baseURL}${endpoint}`;
+        const options = {
+            method: 'GET',
+            url: url,
+            timeout: this.config.timeout || 1000,
+        };
 
-    // Timeout handling
-    public async requestWithTimeout(url: string, timeout: number = 5000) {
-        return axios.get(url, { timeout });
-    }
-
-    // Retry logic
-    public async retryRequest(url: string, retries: number = 3): Promise<any> {
-        let lastError;
-        for (let i = 0; i < retries; i++) {
-            try {
-                const response = await this.requestWithTimeout(this.getProxiedUrl(url));
-                return response.data;
-            } catch (error) {
-                lastError = error;
-                console.error(`Attempt ${i + 1} failed:`, error.message);
-            }
-        }
-        throw lastError;
-    }
-
-    // Health check
-    public async healthCheck(): Promise<boolean> {
         try {
-            const response = await this.requestWithTimeout(this.getProxiedUrl('/health')); // Adjust path as necessary
+            const response = await axios(options);
+            return { data: response.data, status: response.status };
+        } catch (error) {
+            // Handle retry logic
+            if (this.currentRetry < (this.config.retry || 3)) {
+                this.currentRetry++;
+                return this.get(endpoint);
+            }
+            throw error;
+        }
+    }
+
+    // Health check method
+    async healthCheck(): Promise<boolean> {
+        try {
+            const response = await this.get('/health');
             return response.status === 200;
         } catch (error) {
-            console.error('Health check failed:', error.message);
             return false;
         }
     }
 }
 
-export default N8nService;
+// Export the MapleBear class for usage in other parts of the application
+export default MapleBear;
