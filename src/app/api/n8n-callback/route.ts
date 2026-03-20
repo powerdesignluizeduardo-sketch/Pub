@@ -1,28 +1,48 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 
-// In-memory storage for n8n responses
-const n8nResponses: Record<string, any> = {};
+// Memória temporária para guardar as respostas
+// Nota: Em Serverless (Vercel), isso funciona para testes rápidos.
+const responses = new Map<string, any>();
 
-// API endpoint for n8n callback
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method === 'POST') {
-        // Store n8n response in memory
-        const { id, response } = req.body;
-        n8nResponses[id] = response;
-        return res.status(200).json({ message: 'Response stored successfully' });
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { conversationId, text, audioUrl } = body;
+
+    if (!conversationId) {
+      return NextResponse.json({ error: 'conversationId é obrigatório' }, { status: 400 });
     }
 
-    // Handle GET request to poll for responses
-    if (req.method === 'GET') {
-        const { id } = req.query;
-        const response = n8nResponses[id];
-        if (response) {
-            return res.status(200).json({ response });
-        } else {
-            return res.status(404).json({ message: 'No response found for this ID' });
-        }
-    }
+    // Salva a resposta associada ao ID da conversa
+    responses.set(conversationId, {
+      text,
+      audioUrl,
+      timestamp: Date.now()
+    });
 
-    // Method Not Allowed
-    return res.status(405).json({ message: 'Method Not Allowed' });
+    console.log(`Resposta recebida para ID: ${conversationId}`);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: 'Erro ao processar JSON' }, { status: 400 });
+  }
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const conversationId = searchParams.get('conversationId');
+
+  if (!conversationId) {
+    return NextResponse.json({ error: 'conversationId é obrigatório' }, { status: 400 });
+  }
+
+  const response = responses.get(conversationId);
+
+  if (response) {
+    // Opcional: remover da memória após entregar para economizar espaço
+    // responses.delete(conversationId); 
+    return NextResponse.json(response);
+  }
+
+  // Se não encontrou, retorna 404 para o app continuar tentando (polling)
+  return NextResponse.json({ status: 'pending' }, { status: 404 });
 }
