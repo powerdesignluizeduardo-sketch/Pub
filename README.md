@@ -1,11 +1,20 @@
+# Project Title
 
-  # MapleBear
+Project description goes here.
 
-  This is a code bundle for MapleBear. The original project is available at https://www.figma.com/design/8CbQRpmrPFkhADui129SUK/MapleBear.
+## Features
+- Feature 1
+- Feature 2
+- Feature 3
 
-  ## Running the code
+## Installation
+Instructions for installing and running the project.
 
-  Run `npm i` to install the dependencies.
+## Usage
+How to use the project once it is running.
 
-  Run `npm run dev` to start the development server.
-  
+## Contributing
+Guidelines for contributing to the project.
+
+## License
+Information about the project license.
