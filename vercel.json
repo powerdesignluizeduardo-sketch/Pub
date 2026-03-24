@@ -1,0 +1,9 @@
+{
+  "buildCommand": "vite build",
+  "outputDirectory": "./dist",
+  "installCommand": "npm install",
+  "nodeVersion": "20.x",
+  "env": {
+    "VITE_N8N_BASE_URL": "@vite_n8n_base_url"
+  }
+}
